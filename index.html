@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroML — XMM-Newton × Gaia DR3 Source Explorer</title>
+  <meta name="description" content="Interactive visualization platform for exploring cross-matched XMM-Newton and Gaia DR3 astronomical source catalogs. 7,757 sources, 82 features." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/src/styles/variables.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+  <link rel="stylesheet" href="/src/styles/components.css" />
+  <link rel="stylesheet" href="/src/styles/animations.css" />
+  <link rel="stylesheet" href="/src/index.css" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23D4A373'/><circle cx='16' cy='16' r='3' fill='%230B0D10'/><circle cx='10' cy='10' r='1.5' fill='%230B0D10' opacity='0.3'/><circle cx='23' cy='9' r='1' fill='%230B0D10' opacity='0.25'/><circle cx='24' cy='23' r='1.2' fill='%230B0D10' opacity='0.2'/></svg>" />
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-title">AstroML</div>
+      <div class="loading-subtitle">Loading 7,757 sources…</div>
+      <div class="loading-bar-track">
+        <div class="loading-bar-fill" id="loading-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="app" style="display:none;">
+
+    <!-- Header — 48px -->
+    <header class="header" id="header">
+      <div class="header__left">
+        <h1 class="header__title">AstroML</h1>
+        <div class="header__sep"></div>
+        <span class="header__subtitle">XMM-Gaia Crossmatch Explorer</span>
+        <span class="header__badge" id="header-badge">7,757 sources</span>
+      </div>
+      <div class="header__right">
+        <button class="btn btn--icon" id="btn-screenshot" title="Export plot as PNG">
+          <i data-lucide="image"></i>
+        </button>
+        <button class="btn btn--icon" id="btn-csv-export" title="Export data as CSV">
+          <i data-lucide="download"></i>
+        </button>
+        <button class="btn btn--icon" id="btn-fullscreen" title="Fullscreen">
+          <i data-lucide="maximize-2"></i>
+        </button>
+        <button class="btn btn--icon" id="btn-theme" title="Toggle theme">
+          <i data-lucide="moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main 3-Column Layout -->
+    <div class="main-layout">
+
+      <!-- Sidebar — 280px -->
+      <aside class="sidebar" id="sidebar">
+
+        <!-- Axes Section -->
+        <div class="sidebar__section">
+          <h3 class="sidebar__heading">
+            <i data-lucide="axis-3d" class="sidebar__heading-icon"></i>
+            Axes
+          </h3>
+          <div class="control-group">
+            <label class="control-label" for="dropdown-x">X-AXIS</label>
+            <div class="dropdown" id="dropdown-x-wrapper">
+              <button class="dropdown__trigger" id="dropdown-x" type="button">
+                <span id="dropdown-x-label">gaia_Gmag</span>
+                <svg class="dropdown__trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="dropdown-y">Y-AXIS</label>
+            <div class="dropdown" id="dropdown-y-wrapper">
+              <button class="dropdown__trigger" id="dropdown-y" type="button">
+                <span id="dropdown-y-label">xmm_EP_8_RATE</span>
+                <svg class="dropdown__trigger-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <button class="btn btn--ghost btn--full" id="btn-swap-axes">
+            <i data-lucide="arrow-left-right"></i> Swap Axes
+          </button>
+          <button class="btn btn--ghost btn--full" id="btn-reset-selection" title="Clear box/lasso selection">
+            <i data-lucide="x-circle"></i> Reset Selection
+          </button>
+        </div>
+
+        <!-- Display Section -->
+        <div class="sidebar__section">
+          <h3 class="sidebar__heading">
+            <i data-lucide="sliders-horizontal" class="sidebar__heading-icon"></i>
+            Display
+          </h3>
+          <div class="control-group">
+            <label class="control-label">
+              Opacity <span class="control-value" id="val-opacity">0.6</span>
+            </label>
+            <input type="range" id="slider-opacity" class="control-slider" min="0.1" max="1" step="0.05" value="0.6" />
+          </div>
+          <div class="control-group">
+            <label class="control-label">
+              Point Size <span class="control-value" id="val-size">3</span>
+            </label>
+            <input type="range" id="slider-size" class="control-slider" min="1" max="8" step="0.5" value="3" />
+          </div>
+          <div class="control-group control-group--row">
+            <label class="toggle-label">
+              <input type="checkbox" id="toggle-logx" class="toggle-input" />
+              <span class="toggle-switch"></span>
+              Log X
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="toggle-logy" class="toggle-input" />
+              <span class="toggle-switch"></span>
+              Log Y
+            </label>
+          </div>
+          <div class="control-group control-group--row">
+            <label class="toggle-label">
+              <input type="checkbox" id="toggle-density" class="toggle-input" checked />
+              <span class="toggle-switch"></span>
+              Density Color
+            </label>
+          </div>
+        </div>
+
+        <!-- Presets Section -->
+        <div class="sidebar__section">
+          <h3 class="sidebar__heading">
+            <i data-lucide="layout-grid" class="sidebar__heading-icon"></i>
+            Presets
+          </h3>
+          <div class="presets-grid" id="presets-grid"></div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="sidebar__section">
+          <h3 class="sidebar__heading">
+            <i data-lucide="bar-chart-3" class="sidebar__heading-icon"></i>
+            Statistics
+          </h3>
+          <div class="stats-list" id="stats-list">
+            <div class="stat-row"><span class="stat-label">Visible</span><span class="stat-value" id="stat-visible">—</span></div>
+            <div class="stat-row"><span class="stat-label">X Mean</span><span class="stat-value" id="stat-xmean">—</span></div>
+            <div class="stat-row"><span class="stat-label">X Median</span><span class="stat-value" id="stat-xmedian">—</span></div>
+            <div class="stat-row"><span class="stat-label">X StdDev</span><span class="stat-value" id="stat-xstd">—</span></div>
+            <div class="stat-row"><span class="stat-label">Y Mean</span><span class="stat-value" id="stat-ymean">—</span></div>
+            <div class="stat-row"><span class="stat-label">Y Median</span><span class="stat-value" id="stat-ymedian">—</span></div>
+            <div class="stat-row"><span class="stat-label">Y StdDev</span><span class="stat-value" id="stat-ystd">—</span></div>
+            <div class="stat-row"><span class="stat-label">Missing</span><span class="stat-value" id="stat-nullpct">—</span></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Plot Area (Hero) -->
+      <main class="plot-area">
+        <div class="plot-container" id="plot-container">
+          <div id="scatter-plot" class="scatter-plot"></div>
+        </div>
+        <!-- Detail Panel (slide-out right) -->
+        <div class="detail-panel" id="detail-panel" style="display:none;">
+          <div class="detail-panel__header">
+            <h3 class="detail-panel__title">Source Inspector</h3>
+            <button class="btn btn--icon btn--sm" id="btn-close-detail">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <div class="detail-panel__body" id="detail-body"></div>
+        </div>
+      </main>
+
+      <!-- Resources Panel — 240px -->
+      <aside class="resources-panel" id="resources-panel">
+        <span class="resources-panel__label">
+          <i data-lucide="book-open" style="width:12px;height:12px;opacity:0.7;"></i>
+          Resources
+        </span>
+
+        <a href="./column_documentation.html" target="_blank" class="resource-link" id="link-columns">
+          <div class="resource-link__icon"><i data-lucide="file-text"></i></div>
+          <div class="resource-link__body">
+            <span class="resource-link__title">Column Reference</span>
+            <span class="resource-link__desc">All 78 columns — definitions, units &amp; statistics</span>
+          </div>
+          <i data-lucide="external-link" class="resource-link__arrow"></i>
+        </a>
+
+        <a href="./RNAAS_note_about_TD.pdf" target="_blank" class="resource-link" id="link-research">
+          <div class="resource-link__icon"><i data-lucide="telescope"></i></div>
+          <div class="resource-link__body">
+            <span class="resource-link__title">Research Paper</span>
+            <span class="resource-link__desc">RNAAS note on the training dataset</span>
+          </div>
+          <i data-lucide="external-link" class="resource-link__arrow"></i>
+        </a>
+
+        <a href="./Hare_Jeremy--C25.pdf" target="_blank" class="resource-link" id="link-documentation">
+          <div class="resource-link__icon"><i data-lucide="book-marked"></i></div>
+          <div class="resource-link__body">
+            <span class="resource-link__title">Project Documentation</span>
+            <span class="resource-link__desc">MUWCLASS methodology &amp; pipeline overview</span>
+          </div>
+          <i data-lucide="external-link" class="resource-link__arrow"></i>
+        </a>
+
+        <a href="https://github.com/MUWCLASS/MUWCLASS" target="_blank" rel="noopener" class="resource-link" id="link-github">
+          <div class="resource-link__icon"><i data-lucide="github"></i></div>
+          <div class="resource-link__body">
+            <span class="resource-link__title">GitHub Repository</span>
+            <span class="resource-link__desc">MUWCLASS source code &amp; documentation</span>
+          </div>
+          <i data-lucide="external-link" class="resource-link__arrow"></i>
+        </a>
+      </aside>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-section" id="table-section">
+      <div class="table-section__header">
+        <h3 class="table-section__title">
+          <i data-lucide="rows-3"></i>
+          Catalog
+          <span class="header__badge" id="table-count-badge" style="margin-left:8px;">—</span>
+        </h3>
+        <div class="table-section__controls">
+          <input type="text" id="table-search" class="control-input" placeholder="Search by #id or value…" />
+          <button class="btn btn--icon btn--sm" id="btn-toggle-table">
+            <i data-lucide="chevron-down"></i>
+          </button>
+        </div>
+      </div>
+      <div class="table-wrapper" id="table-wrapper" style="display:none;">
+        <table class="data-table" id="data-table">
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <div class="load-more" id="load-more">
+          <button class="load-more__btn" id="btn-load-more">Load more</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer — 32px -->
+    <footer class="footer">
+      <div class="footer__left">
+        <span>XMM-Newton × Gaia DR3 Cross-Match</span>
+        <span>·</span>
+        <span id="footer-sources">7,757 sources</span>
+        <span>·</span>
+        <span>82 features</span>
+      </div>
+      <div class="footer__right">
+        <a href="https://github.com/MUWCLASS/MUWCLASS" target="_blank" rel="noopener" class="footer-link">MUWCLASS</a>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

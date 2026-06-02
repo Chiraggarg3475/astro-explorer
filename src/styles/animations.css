@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Animations — Restrained. Professional tools don't bounce.
+   Only animate what improves usability.
+   ========================================================================== */
+
+/* ---- Loading Screen ---- */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0B0D10;
+  z-index: 9999;
+  transition: opacity 0.4s ease;
+}
+
+.loading-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(212, 163, 115, 0.15);
+  border-top-color: #D4A373;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: #ECEFF4;
+}
+
+.loading-subtitle {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--text-sm);
+  color: #6B7280;
+}
+
+.loading-bar-track {
+  width: 180px;
+  height: 2px;
+  background: #252A33;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: #D4A373;
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+/* ---- Keyframes ---- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- App entrance ---- */
+.app {
+  animation: fadeIn 0.3s ease;
+}
+
+/* ---- Theme transitions (only backgrounds and colors) ---- */
+body,
+.header,
+.sidebar,
+.footer,
+.table-section,
+.histogram-panel,
+.plot-area,
+.detail-panel,
+.detail-panel__header {
+  transition: background-color var(--dur-base) var(--ease),
+              color var(--dur-base) var(--ease),
+              border-color var(--dur-base) var(--ease);
+}

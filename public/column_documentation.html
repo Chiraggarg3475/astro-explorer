@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Column Reference — XMM-Newton × Gaia DR3 Cross-Match Dataset</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1117;
+    --bg-card: #161b22;
+    --bg-group: #1c2230;
+    --border: #2a3140;
+    --border-accent: #D4A373;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-label: #6e7681;
+    --accent: #D4A373;
+    --accent-dim: rgba(212,163,115,0.15);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ---- Header ---- */
+  .doc-header {
+    text-align: center;
+    padding: 48px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .doc-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .doc-header h1 span { color: var(--accent); }
+  .doc-header .subtitle {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .doc-header .meta-badges {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .meta-badge {
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(212,163,115,0.25);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* ---- TOC ---- */
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+  .toc h2 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    columns: 2;
+    column-gap: 32px;
+  }
+  .toc li {
+    counter-increment: toc;
+    padding: 4px 0;
+  }
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero) ".";
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-right: 8px;
+  }
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  .toc a:hover { color: var(--accent); }
+
+  /* ---- Group Sections ---- */
+  .group-section {
+    margin-bottom: 36px;
+  }
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-group);
+    border: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+    border-bottom: 2px solid var(--accent);
+  }
+  .group-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 2px 8px;
+    border-radius: 4px;
+    min-width: 28px;
+    text-align: center;
+  }
+  .group-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .group-header .col-count {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+
+  /* ---- Column Cards ---- */
+  .col-card {
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    transition: background 0.15s;
+  }
+  .col-card:last-child {
+    border-radius: 0 0 8px 8px;
+  }
+  .col-card:hover {
+    background: #1a2030;
+  }
+  .col-name {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .col-desc {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.55;
+    margin-bottom: 10px;
+  }
+  .col-props {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .prop {
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .prop .label {
+    color: var(--text-label);
+    margin-right: 4px;
+  }
+  .prop .val {
+    color: var(--text);
+  }
+  .prop--null .val { color: #f97583; }
+  .prop--full .val { color: #56d364; }
+
+  /* ---- Excluded Section ---- */
+  .excluded {
+    margin-top: 48px;
+    padding: 20px 24px;
+    background: rgba(249,117,131,0.06);
+    border: 1px solid rgba(249,117,131,0.2);
+    border-radius: 8px;
+  }
+  .excluded h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f97583;
+    margin-bottom: 12px;
+  }
+  .excluded .excl-item {
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .excluded .excl-item code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #f97583;
+    background: rgba(249,117,131,0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .excluded .excl-reason {
+    color: var(--text-dim);
+    margin-left: 6px;
+  }
+
+  /* ---- Footer ---- */
+  .doc-footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-label);
+    text-align: center;
+  }
+
+  /* ---- Print Styles ---- */
+  @media print {
+    body { background: #fff; color: #111; font-size: 11px; }
+    .container { max-width: 100%; padding: 0; }
+    .doc-header { padding: 20px 0; }
+    .doc-header h1 { font-size: 20px; color: #111; }
+    .doc-header h1 span { color: #9a6f3e; }
+    .subtitle, .doc-footer { color: #666; }
+    .meta-badge { border-color: #ccc; color: #9a6f3e; background: #faf5ee; }
+    .toc { background: #fafafa; border-color: #ddd; page-break-after: always; }
+    .toc a { color: #111; }
+    .group-header { background: #f5f0e8; border-color: #ddd; border-bottom-color: #9a6f3e; }
+    .group-header h2 { color: #111; }
+    .group-num { color: #9a6f3e; background: #faf5ee; }
+    .col-card { background: #fff; border-color: #e0e0e0; page-break-inside: avoid; }
+    .col-name { color: #9a6f3e; }
+    .col-desc { color: #222; }
+    .prop { background: #f6f6f6; border-color: #ddd; }
+    .prop .val { color: #111; }
+    .excluded { background: #fff5f5; border-color: #fdd; }
+    .excluded h2 { color: #c44; }
+  }
+
+  @media (max-width: 640px) {
+    .toc ol { columns: 1; }
+    .col-props { gap: 4px; }
+    .doc-header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="doc-header">
+    <h1>XMM-Newton <span>×</span> Gaia DR3 Cross-Match Dataset</h1>
+    <p class="subtitle">Column Reference &amp; Data Dictionary</p>
+    <div class="meta-badges">
+      <span class="meta-badge">82 Columns</span>
+      <span class="meta-badge">7,757 Sources</span>
+      <span class="meta-badge">11 Feature Groups</span>
+    </div>
+  </header>
+
+  <!-- Table of Contents -->
+  <nav class="toc">
+    <h2>Feature Groups</h2>
+    <ol>
+      <li><a href="#g1">ML / Classification</a></li>
+      <li><a href="#g2">XMM Timing &amp; Exposure</a></li>
+      <li><a href="#g3">XMM Position &amp; Astrometry</a></li>
+      <li><a href="#g4">XMM Photometry &amp; Flux</a></li>
+      <li><a href="#g5">XMM Hardness Ratios</a></li>
+      <li><a href="#g6">XMM Variability</a></li>
+      <li><a href="#g7">XMM Flags &amp; Quality</a></li>
+      <li><a href="#g8">Gaia Astrometry &amp; Proper Motion</a></li>
+      <li><a href="#g9">Gaia Photometry &amp; Colors</a></li>
+      <li><a href="#g10">Gaia Stellar Parameters &amp; RV</a></li>
+      <li><a href="#g11">Excluded Columns (Empty Data)</a></li>
+    </ol>
+  </nav>
+
+  <!-- ====== GROUP 1 ====== -->
+  <section class="group-section" id="g1">
+    <div class="group-header">
+      <span class="group-num">01</span>
+      <h2>ML / Classification</h2>
+      <span class="col-count">5 columns</span>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">dMEC</div>
+      <div class="col-desc">Cross-match distance between the XMM-Newton and Gaia source positions. Smaller values indicate tighter positional agreement between the X-ray and optical counterpart.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">arcsec</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0003 – 7.18</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">chi2Pos</div>
+      <div class="col-desc">Chi-squared statistic of the positional cross-match, measuring how well the XMM and Gaia positions agree given their respective positional uncertainties.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">3e-6 – 327.18</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">proba_xg</div>
+      <div class="col-desc">Posterior probability P(X|G) that the cross-match is correct — the Gaia source is the true optical counterpart of the X-ray source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">probability (0–1)</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0001 – 1.0</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">proba_x_g</div>
+      <div class="col-desc">Complementary probability P(X,G) that the cross-match is spurious — the Gaia source is a chance positional alignment, not the true counterpart.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">probability (0–1)</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 0.9999</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_No/Nx</div>
+      <div class="col-desc">Ratio of optical (Gaia) sources to X-ray (XMM) sources in the local field. Used to estimate chance coincidence rates in the cross-matching procedure.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 5200.0</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 2 ====== -->
+  <section class="group-section" id="g2">
+    <div class="group-header">
+      <span class="group-num">02</span>
+      <h2>XMM Timing &amp; Exposure</h2>
+      <span class="col-count">3 columns</span>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_PN_TEXP_1</div>
+      <div class="col-desc">Effective exposure time of the EPIC-pn camera for the observation containing this source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">seconds</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0 – 132,916</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_MJD_FIRST</div>
+      <div class="col-desc">Modified Julian Date of the first XMM-Newton detection of this source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">MJD (days)</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">51641.58 – 59836.58</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_MJD_LAST</div>
+      <div class="col-desc">Modified Julian Date of the last XMM-Newton detection of this source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">MJD (days)</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">51643.88 – 59856.25</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 3 ====== -->
+  <section class="group-section" id="g3">
+    <div class="group-header">
+      <span class="group-num">03</span>
+      <h2>XMM Position &amp; Astrometry</h2>
+      <span class="col-count">5 columns</span>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_SC_RA</div>
+      <div class="col-desc">Right Ascension of the X-ray source from the XMM-Newton source catalog (ICRS, J2000 epoch).</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">degrees</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">1.08 – 335.09</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_SC_DEC</div>
+      <div class="col-desc">Declination of the X-ray source from the XMM-Newton source catalog (ICRS, J2000 epoch).</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">degrees</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">−79.88 – 68.61</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_SC_POSERR</div>
+      <div class="col-desc">Combined statistical and systematic 1σ positional uncertainty of the X-ray source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">arcsec</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.14 – 15.63</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_GAL_LONG_1</div>
+      <div class="col-desc">Galactic longitude of the X-ray source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">degrees</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.03 – 358.70</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_GAL_LAT_1</div>
+      <div class="col-desc">Galactic latitude of the X-ray source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">degrees</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">−79.82 – 75.84</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 4 ====== -->
+  <section class="group-section" id="g4">
+    <div class="group-header">
+      <span class="group-num">04</span>
+      <h2>XMM Photometry &amp; Flux</h2>
+      <span class="col-count">10 columns</span>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name">xmm_EP_8_RATE</div>
+      <div class="col-desc">EPIC combined (pn+MOS) count rate in band 8 (0.2–12 keV, total energy band).</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">ct/s</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">4.44e-5 – 84.58</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_EP_8_RATE_ERR</div>
+      <div class="col-desc">1σ statistical error on the EPIC band 8 count rate.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">ct/s</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">2.75e-5 – 0.278</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_EP_8_CTS</div>
+      <div class="col-desc">Total EPIC band 8 source counts (background-subtracted).</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">counts</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">3.66 – 2,048,758</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_EP_8_CTS_ERR</div>
+      <div class="col-desc">1σ error on the EPIC band 8 source counts.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">counts</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">3.89 – 1,432</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_EP_8_FLUX</div>
+      <div class="col-desc">Mean source-catalog flux in EPIC band 8, averaged over all detections and corrected for vignetting and PSF losses.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s/cm²</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">4.41e-16 – 3.81e-11</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_EP_8_FLUX_ERR</div>
+      <div class="col-desc">1σ error on the mean band 8 flux.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s/cm²</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">3.93e-16 – 1.98e-13</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_EP_8_FMIN</div>
+      <div class="col-desc">Minimum flux observed across all detections in band 8.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s/cm²</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">4.41e-16 – 3.15e-11</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_EP_8_FMIN_ERR</div>
+      <div class="col-desc">1σ error on the minimum flux.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s/cm²</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">7.11e-16 – 2.33e-13</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_EP_8_FMAX</div>
+      <div class="col-desc">Maximum flux observed across all detections in band 8.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s/cm²</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">4.41e-16 – 9.17e-11</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_EP_8_FMAX_ERR</div>
+      <div class="col-desc">1σ error on the maximum flux.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s/cm²</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">8.36e-16 – 4.43e-13</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 5 ====== -->
+  <section class="group-section" id="g5">
+    <div class="group-header">
+      <span class="group-num">05</span>
+      <h2>XMM Hardness Ratios</h2>
+      <span class="col-count">8 columns</span>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR1</div>
+      <div class="col-desc">Hardness ratio 1: (B2−B1)/(B2+B1), where B1 = 0.2–0.5 keV, B2 = 0.5–1.0 keV. Sensitive to soft X-ray absorption.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">−1 to +1</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7684 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">0.9%</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR1_ERR</div>
+      <div class="col-desc">1σ error on HR1.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7684 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 1.41</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR2</div>
+      <div class="col-desc">Hardness ratio 2: (B3−B2)/(B3+B2), where B2 = 0.5–1.0 keV, B3 = 1.0–2.0 keV. Sensitive to spectral shape in the medium band.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">−1 to +1</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7715 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">0.5%</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR2_ERR</div>
+      <div class="col-desc">1σ error on HR2.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7715 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 1.41</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR3</div>
+      <div class="col-desc">Hardness ratio 3: (B4−B3)/(B4+B3), where B3 = 1.0–2.0 keV, B4 = 2.0–4.5 keV. Sensitive to hard X-ray emission.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">−1 to +1</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7723 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">0.4%</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR3_ERR</div>
+      <div class="col-desc">1σ error on HR3.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7723 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 1.41</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR4</div>
+      <div class="col-desc">Hardness ratio 4: (B5−B4)/(B5+B4), where B4 = 2.0–4.5 keV, B5 = 4.5–12 keV. Sensitive to very hard or highly absorbed emission.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">−1 to +1</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7586 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">2.2%</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_HR4_ERR</div>
+      <div class="col-desc">1σ error on HR4.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7586 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 1.41</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 6 ====== -->
+  <section class="group-section" id="g6">
+    <div class="group-header">
+      <span class="group-num">06</span>
+      <h2>XMM Variability</h2>
+      <span class="col-count">2 columns</span>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_FVAR</div>
+      <div class="col-desc">Fractional variability amplitude of the X-ray source. Computed from the χ² probability of the light curve being constant. Values near 0 indicate non-variable sources.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">705 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">90.9%</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 15.01</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_FVARERR</div>
+      <div class="col-desc">1σ error on the fractional variability.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">705 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">90.9%</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">0.0 – 106.39</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 7 ====== -->
+  <section class="group-section" id="g7">
+    <div class="group-header">
+      <span class="group-num">07</span>
+      <h2>XMM Flags &amp; Quality</h2>
+      <span class="col-count">4 columns</span>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SUM_FLAG</div>
+      <div class="col-desc">Detection-level summary quality flag. 0 = good, 1 = within extended source, 2 = possibly spurious, 3 = near bad pixels, 4 = near bright source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">flag (0–4)</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">int</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_SUM_FLAG</div>
+      <div class="col-desc">Source-catalog-level summary flag, combining quality information across all detections. Values 0–2 are generally reliable.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">flag (0–4)</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">int</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_DET_ML</div>
+      <div class="col-desc">Detection maximum likelihood. Higher values indicate more significant detections. Values &gt; 6 correspond roughly to &gt;3σ detections.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Range</span><span class="val">6.0 – 1.37e+7</span></span>
+      </div>
+    </div>
+    <div class="col-card">
+      <div class="col-name">xmm_SC_VAR_FLAG</div>
+      <div class="col-desc">XMM variability flag: 0 = not variable, 1 = variable (based on intra-observation χ² test).</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">binary flag</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">int</span></span>
+        <span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span>
+        <span class="prop"><span class="label">Values</span><span class="val">0 or 1</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 8 ====== -->
+  <section class="group-section" id="g8">
+    <div class="group-header">
+      <span class="group-num">08</span>
+      <h2>Gaia Astrometry &amp; Proper Motion</h2>
+      <span class="col-count">11 columns</span>
+    </div>
+    <div class="col-card"><div class="col-name">gaia_RA_ICRS</div><div class="col-desc">Right Ascension of the Gaia DR3 source in ICRS at epoch J2016.0.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">degrees</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span><span class="prop"><span class="label">Range</span><span class="val">7.14 – 335.09</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_DE_ICRS</div><div class="col-desc">Declination of the Gaia DR3 source in ICRS at epoch J2016.0.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">degrees</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span><span class="prop"><span class="label">Range</span><span class="val">−79.87 – 68.61</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_RA_ICRS</div><div class="col-desc">Standard error on the Right Ascension at the reference epoch.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span><span class="prop"><span class="label">Range</span><span class="val">0.005 – 99.59</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_DE_ICRS</div><div class="col-desc">Standard error on the Declination at the reference epoch.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span><span class="prop"><span class="label">Range</span><span class="val">0.007 – 65.86</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_pmRA</div><div class="col-desc">Proper motion in Right Ascension direction (μα cos δ).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas/yr</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6471 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">16.6%</span></span><span class="prop"><span class="label">Range</span><span class="val">−538.14 – 99.04</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_pmRA</div><div class="col-desc">Standard error on proper motion in RA.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas/yr</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6471 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">16.6%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_pmDE</div><div class="col-desc">Proper motion in Declination direction (μδ).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas/yr</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6471 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">16.6%</span></span><span class="prop"><span class="label">Range</span><span class="val">−548.36 – 176.53</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_pmDE</div><div class="col-desc">Standard error on proper motion in Dec.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas/yr</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6471 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">16.6%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_Plx</div><div class="col-desc">Trigonometric parallax. Negative values can occur for distant/faint sources due to measurement noise.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6471 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">16.6%</span></span><span class="prop"><span class="label">Range</span><span class="val">−8.21 – 46.57</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_Plx</div><div class="col-desc">Standard error on the parallax.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mas</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6471 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">16.6%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_RPlx</div><div class="col-desc">Parallax divided by its error (parallax significance). Values &gt; 5 indicate reliable distance estimates.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">—</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6471 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">16.6%</span></span><span class="prop"><span class="label">Range</span><span class="val">−7.66 – 1871.95</span></span></div></div>
+  </section>
+
+  <!-- ====== GROUP 9 ====== -->
+  <section class="group-section" id="g9">
+    <div class="group-header">
+      <span class="group-num">09</span>
+      <h2>Gaia Photometry &amp; Colors</h2>
+      <span class="col-count">12 columns</span>
+    </div>
+    <div class="col-card"><div class="col-name">gaia_Gmag</div><div class="col-desc">Gaia G-band mean magnitude (broad white-light band, 330–1050 nm).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">7705 / 7757</span></span><span class="prop"><span class="label">Range</span><span class="val">3.25 – 21.47</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_Gmag</div><div class="col-desc">Standard error on G-band magnitude.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">7705 / 7757</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_BPmag</div><div class="col-desc">Gaia BP-band mean magnitude (blue photometer, 330–680 nm).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6298 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">18.8%</span></span><span class="prop"><span class="label">Range</span><span class="val">3.28 – 24.53</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_BPmag</div><div class="col-desc">Standard error on BP-band magnitude.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6298 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">18.8%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_RPmag</div><div class="col-desc">Gaia RP-band mean magnitude (red photometer, 630–1050 nm).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6392 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">17.6%</span></span><span class="prop"><span class="label">Range</span><span class="val">3.40 – 21.66</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_RPmag</div><div class="col-desc">Standard error on RP-band magnitude.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">6392 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">17.6%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_AG</div><div class="col-desc">Estimated G-band extinction from Gaia's astrophysical parameters inference system (Apsis).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span><span class="prop"><span class="label">Range</span><span class="val">0.0 – 6.78</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_b_AG</div><div class="col-desc">Lower confidence bound (16th percentile) on the G-band extinction.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_B_AG</div><div class="col-desc">Upper confidence bound (84th percentile) on the G-band extinction.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_E(BP-RP)</div><div class="col-desc">Estimated color excess E(BP−RP) from Apsis.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span><span class="prop"><span class="label">Range</span><span class="val">0.0 – 3.91</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_b_E(BP-RP)</div><div class="col-desc">Lower confidence bound (16th percentile) on E(BP−RP).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_B_E(BP-RP)</div><div class="col-desc">Upper confidence bound (84th percentile) on E(BP−RP).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">mag</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+  </section>
+
+  <!-- ====== GROUP 10 ====== -->
+  <section class="group-section" id="g10">
+    <div class="group-header">
+      <span class="group-num">10</span>
+      <h2>Gaia Stellar Parameters &amp; RV</h2>
+      <span class="col-count">18 columns</span>
+    </div>
+    <div class="col-card"><div class="col-name">gaia_Teff</div><div class="col-desc">Effective temperature estimated by Gaia's Apsis pipeline (GSP-Phot or ESP-HS).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">K</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span><span class="prop"><span class="label">Range</span><span class="val">3000 – 41,342</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_b_Teff</div><div class="col-desc">Lower confidence bound (16th percentile) on Teff.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">K</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_B_Teff</div><div class="col-desc">Upper confidence bound (84th percentile) on Teff.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">K</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_logg</div><div class="col-desc">Surface gravity (log₁₀ g) estimated by Apsis.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">dex</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span><span class="prop"><span class="label">Range</span><span class="val">0.07 – 5.10</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_b_logg</div><div class="col-desc">Lower confidence bound (16th percentile) on log g.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">dex</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_B_logg</div><div class="col-desc">Upper confidence bound (84th percentile) on log g.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">dex</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_[Fe/H]</div><div class="col-desc">Metallicity [Fe/H] estimated by Apsis. Solar metallicity = 0.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">dex</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span><span class="prop"><span class="label">Range</span><span class="val">−4.15 – 0.79</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_b_[Fe/H]</div><div class="col-desc">Lower confidence bound (16th percentile) on [Fe/H].</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">dex</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_B_[Fe/H]</div><div class="col-desc">Upper confidence bound (84th percentile) on [Fe/H].</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">dex</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">2614 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">66.3%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_RV</div><div class="col-desc">Median radial velocity from the Gaia Radial Velocity Spectrometer (RVS).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">km/s</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">836 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">89.2%</span></span><span class="prop"><span class="label">Range</span><span class="val">−245.39 – 182.72</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_e_RV</div><div class="col-desc">Standard error on the radial velocity.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">km/s</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">836 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">89.2%</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_n_RV</div><div class="col-desc">Number of transits used to compute the radial velocity.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">count</span></span><span class="prop"><span class="label">Type</span><span class="val">int</span></span><span class="prop"><span class="label">Valid</span><span class="val">836 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">89.2%</span></span><span class="prop"><span class="label">Values</span><span class="val">1 or 2</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_o_RV</div><div class="col-desc">Number of valid CCD observations contributing to the RV measurement.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">count</span></span><span class="prop"><span class="label">Type</span><span class="val">int</span></span><span class="prop"><span class="label">Valid</span><span class="val">836 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">89.2%</span></span><span class="prop"><span class="label">Range</span><span class="val">2 – 59</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_RVchi2</div><div class="col-desc">Goodness-of-fit p-value for the RV time series being constant (0 = highly variable, 1 = constant).</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">probability</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">319 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">95.9%</span></span><span class="prop"><span class="label">Range</span><span class="val">0.0 – 1.0</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_RVTdur</div><div class="col-desc">Time duration spanned by the RV transits.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">days</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">836 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">89.2%</span></span><span class="prop"><span class="label">Range</span><span class="val">0.07 – 1009.23</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_RVamp</div><div class="col-desc">Peak-to-peak amplitude of the radial velocity variations.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">km/s</span></span><span class="prop"><span class="label">Type</span><span class="val">float</span></span><span class="prop"><span class="label">Valid</span><span class="val">319 / 7757</span></span><span class="prop prop--null"><span class="label">Null</span><span class="val">95.9%</span></span><span class="prop"><span class="label">Range</span><span class="val">0.19 – 510.58</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_VarFlag</div><div class="col-desc">Gaia variability flag, numerically encoded: 0 = NOT_AVAILABLE (no variability processing), 1 = VARIABLE (source identified as variable by Gaia). 729 sources (9.4%) are flagged as variable.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">binary flag</span></span><span class="prop"><span class="label">Type</span><span class="val">int</span></span><span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span><span class="prop"><span class="label">Values</span><span class="val">0 (7028) · 1 (729)</span></span></div></div>
+    <div class="col-card"><div class="col-name">gaia_RVS</div><div class="col-desc">Gaia RVS-band magnitude indicator (845–872 nm spectroscopic range). In this dataset, encoded as a binary flag: 0 = not available, 1 = available.</div><div class="col-props"><span class="prop"><span class="label">Unit</span><span class="val">binary flag</span></span><span class="prop"><span class="label">Type</span><span class="val">int</span></span><span class="prop prop--full"><span class="label">Valid</span><span class="val">7757 / 7757</span></span><span class="prop"><span class="label">Values</span><span class="val">0 or 1</span></span></div></div>
+  </section>
+
+  <!-- ====== GROUP 11: EXCLUDED ====== -->
+  <section class="group-section" id="g11">
+    <div class="group-header" style="border-bottom-color:#f97583;">
+      <span class="group-num" style="color:#f97583;background:rgba(249,117,131,0.15);">11</span>
+      <h2>Excluded Columns <span style="font-weight:400;font-size:13px;color:var(--text-dim);">(Empty Data — Not Used in Application)</span></h2>
+      <span class="col-count">4 columns</span>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#f97583;">xmm_SC_EXTENT</div>
+      <div class="col-desc">Source spatial extent parameter from the XMM-Newton source detection pipeline. Measures the angular extent of the X-ray source beyond the PSF. A value of 0 indicates a point source. <strong>Excluded:</strong> all 7,757 values are exactly 0.0 — every source in this dataset is a point source.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">arcsec</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--null"><span class="label">Status</span><span class="val">ALL ZERO</span></span>
+        <span class="prop"><span class="label">Values</span><span class="val">7757 × 0.0</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#f97583;">xmm_SC_EXT_ERR</div>
+      <div class="col-desc">1σ error on the source spatial extent parameter. <strong>Excluded:</strong> all 7,757 values are NaN — no valid extent measurement exists for any source in this dataset.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">arcsec</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop prop--null"><span class="label">Status</span><span class="val">ALL NaN (100%)</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">0 / 7757</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#f97583;">xmm_CONFUSED</div>
+      <div class="col-desc">Boolean flag indicating whether the X-ray source detection is confused — i.e., potentially contaminated by overlapping PSFs from nearby sources. <strong>Excluded:</strong> all 7,757 values are False — no source in this dataset is flagged as confused.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">boolean</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">bool</span></span>
+        <span class="prop prop--null"><span class="label">Status</span><span class="val">ALL FALSE</span></span>
+        <span class="prop"><span class="label">Values</span><span class="val">7757 × False</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#f97583;">xmm_HIGH_BACKGROUND</div>
+      <div class="col-desc">Boolean flag indicating whether the source was detected in a region of anomalously high X-ray background. Such sources may have unreliable flux and positional measurements. <strong>Excluded:</strong> all 7,757 values are False — no source in this dataset is in a high-background region.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">boolean</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">bool</span></span>
+        <span class="prop prop--null"><span class="label">Status</span><span class="val">ALL FALSE</span></span>
+        <span class="prop"><span class="label">Values</span><span class="val">7757 × False</span></span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="doc-footer">
+    <p>Source: reduced_xmm_gaiadr3_xmatch_new_poserr_cluster_20.csv &nbsp;·&nbsp; Generated for AstroML Explorer</p>
+  </footer>
+
+</div>
+</body>
+</html>

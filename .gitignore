@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Dataset files (large, not needed in repo)
+mine_dataset/
+
+# Root-level PDFs (copies live in public/ for serving)
+/Hare_Jeremy--C25.pdf
+/RNAAS_note_about_TD.pdf
+
+# MUWCLASS source code (not part of the website)
+MUWCLASS-main/
+MUWCLASS_CSCv2-main/
+
+# Build output (generated via npm run build)
+dist/
+
+# Scripts temp output
+scripts/col_stats.json
+
+# System files
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE
+.vscode/
+.idea/

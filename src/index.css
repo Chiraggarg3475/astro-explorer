@@ -1,0 +1,45 @@
+/* ==========================================================================
+   index.css — Plotly overrides, selection, global tweaks
+   ========================================================================== */
+
+/* Plotly modebar — blend into background, don't compete */
+.js-plotly-plot .plotly .modebar {
+  background: transparent !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn {
+  color: var(--text-tertiary) !important;
+  opacity: 1 !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn:hover {
+  color: var(--text-secondary) !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn.active {
+  color: var(--accent-primary) !important;
+}
+
+/* Remove Plotly logo link */
+.js-plotly-plot .plotly a[rel="noopener noreferrer"] {
+  display: none !important;
+}
+
+/* Plotly tooltip override */
+.js-plotly-plot .plotly .hoverlayer .hovertext rect {
+  rx: 4 !important;
+  ry: 4 !important;
+}
+
+/* Selection */
+::selection {
+  background: rgba(212, 163, 115, 0.3);
+  color: var(--text-primary);
+}
+
+/* Tabular numerals globally for data */
+.font-mono,
+[data-numeric] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}

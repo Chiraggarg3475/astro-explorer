@@ -1,0 +1,148 @@
+/* ==========================================================================
+   Design Tokens — AstroML v2
+   
+   Palette: Deep space + warm copper instrument readouts.
+   Inspired by observatory control rooms, not crypto dashboards.
+   
+   NO neon. NO glows. NO gradients. NO shadows > 3px.
+   ========================================================================== */
+
+:root,
+[data-theme="dark"] {
+  /* Backgrounds — 4-layer depth hierarchy */
+  --bg-primary:     #0B0D10;    /* Deep void — main canvas */
+  --bg-secondary:   #111318;    /* Slightly elevated — panels */
+  --bg-tertiary:    #16191F;    /* Input fields, table headers */
+  --bg-elevated:    #1C1F26;    /* Hover states, dropdowns */
+
+  /* Surfaces */
+  --surface-default: #1A1D24;
+  --surface-hover:   #22262E;
+  --surface-active:  #2A2F38;
+  --surface-selected:#2D333D;
+
+  /* Borders — solid hex, NOT rgba */
+  --border-subtle:  #252A33;
+  --border-default: #2E3440;
+  --border-strong:  #3B4252;
+
+  /* Text — warm off-whites */
+  --text-primary:   #ECEFF4;
+  --text-secondary: #A0A8B8;
+  --text-tertiary:  #6B7280;
+  --text-inverse:   #0B0D10;
+
+  /* Accent — Warm Copper/Amber (NOT cyan, NOT teal) */
+  --accent-primary:       #D4A373;
+  --accent-primary-hover: #E9C496;
+  --accent-secondary:       #8B9EB7;
+  --accent-secondary-hover: #A8B8D0;
+
+  /* Chart palette — muted, distinguishable, colorblind-safe */
+  --chart-c1: #D4A373;   /* Copper */
+  --chart-c2: #8B9EB7;   /* Steel Blue */
+  --chart-c3: #A3B18A;   /* Sage Green */
+  --chart-c4: #CBAF9A;   /* Warm Sand */
+  --chart-c5: #9A8C98;   /* Muted Purple */
+  --chart-c6: #8FA8B8;   /* Slate */
+  --chart-density: #D4A373;
+
+  /* Semantic */
+  --success: #7FA885;
+  --warning: #D4A373;
+  --error:   #C97B7B;
+  --info:    #8B9EB7;
+
+  /* Shadows — minimal */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-tooltip: 0 2px 8px rgba(0,0,0,0.4);
+
+  /* Plot */
+  --plot-bg:    #0B0D10;
+  --plot-grid:  #252A33;
+  --plot-axis:  #2E3440;
+  --plot-text:  #A0A8B8;
+}
+
+/* Light mode — inverted with care */
+[data-theme="light"] {
+  --bg-primary:     #F5F6F8;
+  --bg-secondary:   #FFFFFF;
+  --bg-tertiary:    #ECEEF2;
+  --bg-elevated:    #E4E6EB;
+
+  --surface-default: #FFFFFF;
+  --surface-hover:   #F0F1F4;
+  --surface-active:  #E8E9ED;
+  --surface-selected:#DFE1E6;
+
+  --border-subtle:  #E2E5E9;
+  --border-default: #D1D5DB;
+  --border-strong:  #B8BCC4;
+
+  --text-primary:   #1A1D24;
+  --text-secondary: #5A6270;
+  --text-tertiary:  #8B909E;
+  --text-inverse:   #ECEFF4;
+
+  --accent-primary:       #B8864E;
+  --accent-primary-hover: #A37540;
+  --accent-secondary:       #6B839E;
+  --accent-secondary-hover: #5A7290;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-tooltip: 0 2px 8px rgba(0,0,0,0.1);
+
+  --plot-bg:    #FFFFFF;
+  --plot-grid:  #E2E5E9;
+  --plot-axis:  #D1D5DB;
+  --plot-text:  #5A6270;
+}
+
+/* ---- Spacing — 8px base ---- */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius — tight, professional */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+
+  --text-xs:  11px;
+  --text-sm:  12px;
+  --text-base: 13px;
+  --text-md:  14px;
+  --text-lg:  16px;
+  --text-xl:  20px;
+  --text-2xl: 24px;
+
+  --font-normal:   400;
+  --font-medium:   500;
+  --font-semibold: 600;
+
+  --tracking-tight:  -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.02em;
+
+  /* Layout */
+  --sidebar-w: 280px;
+  --hist-w: 240px;
+  --header-h: 48px;
+  --footer-h: 32px;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+}

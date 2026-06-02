@@ -527,7 +527,7 @@ function renderPlot() {
     plot_bgcolor: colors.bgColor,
     margin: { l: 62, r: 16, t: 12, b: 52 },
     hovermode: 'closest',
-    dragmode: 'zoom',
+    dragmode: false,
     font: { family: 'Inter, system-ui, sans-serif', color: colors.textColor },
     hoverlabel: {
       bgcolor: colors.hoverBg,
@@ -539,7 +539,7 @@ function renderPlot() {
   const config = {
     responsive: true,
     displaylogo: false,
-    modeBarButtonsToRemove: ['autoScale2d', 'pan2d', 'select2d', 'lasso2d', 'zoom2d', 'zoomIn2d', 'zoomOut2d'],
+    modeBarButtonsToRemove: ['autoScale2d', 'pan2d', 'select2d', 'lasso2d', 'zoom2d'],
     toImageButtonOptions: {
       format: 'png',
       filename: `astroml_${currentXCol}_vs_${currentYCol}`,

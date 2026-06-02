@@ -12,7 +12,8 @@
 export async function loadCatalog(onProgress) {
   onProgress?.(10);
 
-  const response = await fetch('./data/catalog.json');
+  const base = import.meta.env.BASE_URL || './';
+  const response = await fetch(`${base}data/catalog.json`);
   if (!response.ok) throw new Error(`Failed to load catalog: ${response.status}`);
 
   onProgress?.(30);

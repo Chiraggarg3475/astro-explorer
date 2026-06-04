@@ -283,9 +283,9 @@
     <h1>XMM-Newton <span>×</span> Gaia DR3 Cross-Match Dataset</h1>
     <p class="subtitle">Column Reference &amp; Data Dictionary</p>
     <div class="meta-badges">
-      <span class="meta-badge">82 Columns</span>
+      <span class="meta-badge">89 Columns</span>
       <span class="meta-badge">7,757 Sources</span>
-      <span class="meta-badge">11 Feature Groups</span>
+      <span class="meta-badge">12 Feature Groups</span>
     </div>
   </header>
 
@@ -304,6 +304,7 @@
       <li><a href="#g9">Gaia Photometry &amp; Colors</a></li>
       <li><a href="#g10">Gaia Stellar Parameters &amp; RV</a></li>
       <li><a href="#g11">Excluded Columns (Empty Data)</a></li>
+      <li><a href="#g12">Derived Properties</a></li>
     </ol>
   </nav>
 
@@ -871,6 +872,98 @@
         <span class="prop"><span class="label">Type</span><span class="val">bool</span></span>
         <span class="prop prop--null"><span class="label">Status</span><span class="val">ALL FALSE</span></span>
         <span class="prop"><span class="label">Values</span><span class="val">7757 × False</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GROUP 12: DERIVED ====== -->
+  <section class="group-section" id="g12">
+    <div class="group-header" style="border-bottom-color:#56d364;">
+      <span class="group-num" style="color:#56d364;background:rgba(86,211,100,0.15);">12</span>
+      <h2>Derived Properties <span style="font-weight:400;font-size:13px;color:var(--text-dim);">(Computed from Catalog Columns)</span></h2>
+      <span class="col-count">7 columns</span>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#56d364;">distance_pc</div>
+      <div class="col-desc">Distance to the source in parsecs, computed from trigonometric parallax: <code>distance = 1000 / gaia_Plx</code> (where Plx is in mas). Only computed for sources with positive parallax.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">pc</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">5263 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">32.2%</span></span>
+        <span class="prop"><span class="label">Formula</span><span class="val">1000 / gaia_Plx</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#56d364;">Lx</div>
+      <div class="col-desc">X-ray luminosity in the 0.2–12 keV band, computed from the X-ray flux and distance: <code>Lx = Flux × 4π × d²</code>, where d is the distance in cm (distance_pc × 3.086×10¹⁸).</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">5263 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">32.2%</span></span>
+        <span class="prop"><span class="label">Formula</span><span class="val">xmm_SC_EP_8_FLUX × 4π × d_cm²</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#56d364;">gaia_color_GRP</div>
+      <div class="col-desc">Gaia optical color index G − RP, computed as the difference between G-band and RP-band magnitudes.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">mag</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">6347 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">18.2%</span></span>
+        <span class="prop"><span class="label">Formula</span><span class="val">gaia_Gmag − gaia_RPmag</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#56d364;">gaia_color_BPRP</div>
+      <div class="col-desc">Gaia optical color index BP − RP, computed as the difference between BP-band and RP-band magnitudes. Widely used for Hertzsprung–Russell diagrams.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">mag</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">6294 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">18.9%</span></span>
+        <span class="prop"><span class="label">Formula</span><span class="val">gaia_BPmag − gaia_RPmag</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#56d364;">MG</div>
+      <div class="col-desc">Absolute G-band magnitude, computed using the distance modulus: <code>MG = Gmag − 5 × log₁₀(d / 10)</code>.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">mag</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">5242 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">32.4%</span></span>
+        <span class="prop"><span class="label">Formula</span><span class="val">gaia_Gmag − 5×log₁₀(d/10)</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#56d364;">G_flux_corr_Gaia</div>
+      <div class="col-desc">Corrected Gaia G-band flux, computed from magnitude using the effective bandwidth (W<sub>eff</sub> = 4052.97 Å) and zero point (ZP = 2.5×10⁻⁹): <code>F_G = 10^(−0.4 × Gmag) × W_eff × ZP</code>.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">erg/s/cm²</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7705 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">0.7%</span></span>
+      </div>
+    </div>
+
+    <div class="col-card">
+      <div class="col-name" style="color:#56d364;">Flux_ratio_xo</div>
+      <div class="col-desc">X-ray to optical flux ratio: <code>F_X / F_G</code>. A key diagnostic for source classification — values &gt; 1 suggest X-ray dominated sources (e.g., AGN), while values ≪ 1 are typical of normal stars.</div>
+      <div class="col-props">
+        <span class="prop"><span class="label">Unit</span><span class="val">—</span></span>
+        <span class="prop"><span class="label">Type</span><span class="val">float</span></span>
+        <span class="prop"><span class="label">Valid</span><span class="val">7705 / 7757</span></span>
+        <span class="prop prop--null"><span class="label">Null</span><span class="val">0.7%</span></span>
+        <span class="prop"><span class="label">Formula</span><span class="val">xmm_SC_EP_8_FLUX / G_flux_corr_Gaia</span></span>
       </div>
     </div>
   </section>

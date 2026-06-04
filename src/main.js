@@ -633,7 +633,17 @@ function showSourceDetail(rowIndex) {
   const panel = document.getElementById('detail-panel');
   const body = document.getElementById('detail-body');
 
-  let html = `<div class="detail-panel__source-id">Source #${rowIndex}</div>`;
+  // Build SIMBAD URL from RA/DEC
+  const ra = row['xmm_SC_RA'];
+  const dec = row['xmm_SC_DEC'];
+  let simbadBtn = '';
+  if (ra !== null && ra !== undefined && dec !== null && dec !== undefined) {
+    const decStr = dec >= 0 ? `%2B${dec}` : `${dec}`;
+    const simbadUrl = `https://simbad.cds.unistra.fr/simbad/sim-coo?Coord=${ra}+${decStr}&CooFrame=ICRS&Radius=5&Radius.unit=arcsec`;
+    simbadBtn = `<a href="${simbadUrl}" target="_blank" rel="noopener" class="simbad-btn" title="Search SIMBAD for this source">🔭 View in SIMBAD</a>`;
+  }
+
+  let html = `<div class="detail-panel__source-id">Source #${rowIndex}${simbadBtn}</div>`;
   const groups = getGroups();
   groups.forEach(groupName => {
     const cols = getColumnsForGroup(groupName);

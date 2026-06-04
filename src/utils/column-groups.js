@@ -16,6 +16,7 @@ const GROUPS = [
   'Gaia Astrometry & Proper Motion',
   'Gaia Photometry & Colors',
   'Gaia Stellar Parameters & RV',
+  'Derived Properties',
 ];
 
 const COLUMN_META = {
@@ -116,6 +117,15 @@ const COLUMN_META = {
   'gaia_RVamp':     { label: 'RV Amplitude', short: 'RV Amp', unit: 'km/s', group: 'Gaia Stellar Parameters & RV', format: 'fixed:2' },
   'gaia_VarFlag':   { label: 'Variability Flag (0=No, 1=Yes)', short: 'VarFlag', unit: '', group: 'Gaia Stellar Parameters & RV', format: 'fixed:0' },
   'gaia_RVS':       { label: 'RVS Magnitude', short: 'RVS', unit: 'mag', group: 'Gaia Stellar Parameters & RV', format: 'fixed:3' },
+
+  // ── Group 11: Derived Properties ──
+  'distance_pc':      { label: 'Distance', short: 'Dist', unit: 'pc', group: 'Derived Properties', format: 'fixed:1' },
+  'Lx':               { label: 'X-ray Luminosity', short: 'Lx', unit: 'erg/s', group: 'Derived Properties', format: 'exp' },
+  'gaia_color_GRP':   { label: 'Color (G − RP)', short: 'G−RP', unit: 'mag', group: 'Derived Properties', format: 'fixed:3' },
+  'gaia_color_BPRP':  { label: 'Color (BP − RP)', short: 'BP−RP', unit: 'mag', group: 'Derived Properties', format: 'fixed:3' },
+  'MG':               { label: 'Absolute G Magnitude', short: 'MG', unit: 'mag', group: 'Derived Properties', format: 'fixed:2' },
+  'G_flux_corr_Gaia': { label: 'Corrected Gaia G Flux', short: 'FG', unit: 'erg/s/cm²', group: 'Derived Properties', format: 'exp' },
+  'Flux_ratio_xo':    { label: 'X-ray/Optical Flux Ratio', short: 'Fx/Fo', unit: '', group: 'Derived Properties', format: 'exp' },
 };
 
 /**
